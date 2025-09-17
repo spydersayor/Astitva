@@ -1,0 +1,19 @@
+{
+  "name": "astitva",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "cd frontend && npm install && npm run build && cd ../backend && npm install",
+    "start": "concurrently \"cd backend && npm run start\" \"cd frontend && npm start\"",
+    "server": "cd backend && npm start",
+    "client": "cd frontend && npm start"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
