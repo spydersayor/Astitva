@@ -4,6 +4,7 @@ import type React from "react"
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
+import { motion, AnimatePresence } from "framer-motion"
 import { useChat } from "@ai-sdk/react"
 import { DefaultChatTransport } from "ai"
 import { Button } from "@/components/ui/button"
@@ -147,6 +148,16 @@ export default function ChatPage() {
                       variant="outline"
                       size="sm"
                       onClick={() => {
+                        setInputValue("Start Guided Assessment")
+                      }}
+                      className="text-xs"
+                    >
+                      Start Guided Assessment
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
                         setInputValue("I feel anxious about my future")
                       }}
                       className="text-xs"
@@ -157,41 +168,55 @@ export default function ChatPage() {
                 </div>
               )}
 
-              {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`flex items-start space-x-3 ${
-                    message.role === "user" ? "flex-row-reverse space-x-reverse" : ""
-                  }`}
-                >
-                  <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                      message.role === "user"
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-secondary text-secondary-foreground"
+              <AnimatePresence initial={false}>
+                {messages.map((message) => (
+                  <motion.div
+                    key={message.id}
+                    initial={{ opacity: 0, y: 6, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -6, scale: 0.98 }}
+                    transition={{ duration: 0.18, ease: "easeOut" }}
+                    className={`flex items-start space-x-3 ${
+                      message.role === "user" ? "flex-row-reverse space-x-reverse" : ""
                     }`}
                   >
-                    {message.role === "user" ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
-                  </div>
-                  <div className={`flex-1 max-w-xs sm:max-w-md ${message.role === "user" ? "text-right" : ""}`}>
                     <div
-                      className={`p-3 rounded-lg ${
+                      className={`w-8 h-8 rounded-full flex items-center justify-center ${
                         message.role === "user"
-                          ? "bg-primary text-primary-foreground ml-auto"
+                          ? "bg-primary text-primary-foreground"
                           : "bg-secondary text-secondary-foreground"
                       }`}
                     >
-                      <p className="text-sm whitespace-pre-wrap">{message.content.replace("CRISIS_ALERT", "")}</p>
+                      {message.role === "user" ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
                     </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {message.role === "user" ? "You" : "Astitva AI"}
-                    </p>
-                  </div>
-                </div>
-              ))}
+                    <div className={`flex-1 max-w-xs sm:max-w-md ${message.role === "user" ? "text-right" : ""}`}>
+                      <motion.div
+                        initial={{ opacity: 0, y: 4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className={`p-3 rounded-lg ${
+                          message.role === "user"
+                            ? "bg-primary text-primary-foreground ml-auto"
+                            : "bg-secondary text-secondary-foreground"
+                        }`}
+                      >
+                        <p className="text-sm whitespace-pre-wrap">{message.content.replace("CRISIS_ALERT", "")}</p>
+                      </motion.div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {message.role === "user" ? "You" : "Astitva AI"}
+                      </p>
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
 
               {status === "in_progress" && (
-                <div className="flex items-start space-x-3">
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.2 }}
+                  className="flex items-start space-x-3"
+                >
                   <div className="w-8 h-8 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center">
                     <Bot className="w-4 h-4" />
                   </div>
@@ -199,19 +224,13 @@ export default function ChatPage() {
                     <div className="p-3 rounded-lg bg-secondary text-secondary-foreground">
                       <div className="flex space-x-1">
                         <div className="w-2 h-2 bg-current rounded-full animate-bounce"></div>
-                        <div
-                          className="w-2 h-2 bg-current rounded-full animate-bounce"
-                          style={{ animationDelay: "0.1s" }}
-                        ></div>
-                        <div
-                          className="w-2 h-2 bg-current rounded-full animate-bounce"
-                          style={{ animationDelay: "0.2s" }}
-                        ></div>
+                        <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
+                        <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
                       </div>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">Astitva AI is typing...</p>
                   </div>
-                </div>
+                </motion.div>
               )}
             </div>
 
