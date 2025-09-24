@@ -78,3 +78,4 @@ For Streamlit Cloud, set `OPENAI_API_KEY` in app Secrets. Do not commit real key
 - Double-check `.gitignore` before committing; ensure no `.env` files are tracked.
 - Rotate keys if a secret is ever exposed.
 - Use role-based keys and least-privilege where possible.
+

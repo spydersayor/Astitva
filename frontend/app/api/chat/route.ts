@@ -1,7 +1,8 @@
-import { openai } from "@ai-sdk/openai"
-import { convertToModelMessages, streamText, type UIMessage } from "ai"
+import { createMistral } from "@ai-sdk/mistral"
+import { convertToModelMessages, streamText } from "ai"
 
 export const maxDuration = 30
+export const runtime = "nodejs"
 
 const MENTAL_HEALTH_SYSTEM_PROMPT = `You are Astitva AI, a compassionate mental health support chatbot for Indian students.
 
@@ -42,30 +43,61 @@ TONE
 Always be warm, non-judgmental, and encouraging. Ask follow-up questions to understand their situation better. Keep answers concise and skimmable with short paragraphs or bullet points where helpful.`
 
 export async function POST(req: Request) {
-  const { messages }: { messages: UIMessage[] } = await req.json()
+  try {
+    if (!process.env.MISTRAL_API_KEY) {
+      return new Response(JSON.stringify({ error: "Server misconfiguration: missing Mistral API key" }), {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      })
+    }
 
-  const prompt = convertToModelMessages([{ role: "system", content: MENTAL_HEALTH_SYSTEM_PROMPT }, ...messages])
+    const body = (await req.json()) as any
+    const incoming: any[] = Array.isArray(body?.messages) ? body.messages : []
 
-  const result = streamText({
-    model: openai("gpt-4"),
-    messages: prompt,
-    maxTokens: 1000,
-    temperature: 0.7,
-    abortSignal: req.signal,
-  })
+    // Normalize to UIMessage with parts[]
+    const uiMessages = [
+      { role: "system" as const, parts: [{ type: "text" as const, text: MENTAL_HEALTH_SYSTEM_PROMPT }] },
+      ...incoming.map((m: any) => {
+        const role = (m?.role === "user" || m?.role === "assistant") ? m.role : "user"
+        // prefer parts[].text if present, else fallback to content
+        const text = Array.isArray(m?.parts)
+          ? m.parts.map((p: any) => (p && typeof p === "object" && "text" in p ? (p as any).text : "")).join(" ").trim()
+          : (typeof m?.content === "string" ? m.content : "")
+        return { role, parts: [{ type: "text" as const, text }] }
+      }),
+    ]
 
-  return result.toUIMessageStreamResponse({
-    onFinish: async ({ text, isAborted }) => {
-      if (isAborted) {
-        console.log("Chat aborted")
-        return
-      }
+    const prompt = convertToModelMessages(uiMessages)
 
-      // Crisis detection logging
-      if (text.includes("CRISIS_ALERT")) {
-        console.log("[CRISIS DETECTED] Alert triggered for user message")
-        // In a real app, this would trigger counsellor notifications
-      }
-    },
-  })
+    const mistralProvider = createMistral({
+      apiKey: process.env.MISTRAL_API_KEY!,
+      baseURL: process.env.MISTRAL_BASE_URL, // e.g. https://api.mistral.ai/v1 or OpenRouter endpoint
+    })
+
+    const result = streamText({
+      model: mistralProvider("mistral-small-latest"),
+      messages: prompt,
+      temperature: 0.7,
+      abortSignal: req.signal,
+    })
+
+    return result.toUIMessageStreamResponse()
+  } catch (error) {
+    const anyErr: any = error
+    const code =
+      anyErr?.error?.code || anyErr?.code || anyErr?.response?.data?.error?.code || anyErr?.response?.data?.code
+
+    if (code === "insufficient_quota") {
+      return new Response(
+        JSON.stringify({ error: "AI quota exceeded. Please update billing or use a new API key." }),
+        { status: 429, headers: { "Content-Type": "application/json" } }
+      )
+    }
+
+    console.error("Chat API error:", error)
+    return new Response(JSON.stringify({ error: "Chat service failed. Please try again." }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    })
+  }
 }

@@ -6,9 +6,11 @@
     "build": "next build",
     "dev": "next dev",
     "lint": "next lint",
-    "start": "next start"
+    "prestart": "next build",
+    "start": "next start -p 3000"
   },
   "dependencies": {
+    "@ai-sdk/mistral": "^2.0.16",
     "@ai-sdk/openai": "latest",
     "@ai-sdk/react": "latest",
     "@hookform/resolvers": "^3.10.0",
@@ -47,10 +49,10 @@
     "cmdk": "1.0.4",
     "date-fns": "4.1.0",
     "embla-carousel-react": "8.5.1",
+    "framer-motion": "^11.3.30",
     "geist": "latest",
     "input-otp": "1.4.1",
     "lucide-react": "^0.454.0",
-    "framer-motion": "^11.3.30",
     "next": "^14.2.32",
     "next-themes": "^0.4.6",
     "react": "^18",

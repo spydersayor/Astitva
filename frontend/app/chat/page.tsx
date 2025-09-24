@@ -22,14 +22,19 @@ export default function ChatPage() {
   const router = useRouter()
   const [inputValue, setInputValue] = useState("")
   const [showCrisisAlert, setShowCrisisAlert] = useState(false)
+  const [errorMessage, setErrorMessage] = useState("")
 
   const { messages, sendMessage, status } = useChat({
     transport: new DefaultChatTransport({ api: "/api/chat" }),
-    onFinish: (message) => {
-      // Check for crisis alerts
-      if (message.content.includes("CRISIS_ALERT")) {
-        setShowCrisisAlert(true)
-      }
+    onError: () => {
+      setErrorMessage("The AI chat is temporarily unavailable. Please try again shortly.")
+    },
+    onFinish: ({ message }) => {
+      const parts = (message as any)?.parts || []
+      const text = Array.isArray(parts)
+        ? parts.map((p: any) => (p && typeof p === "object" && "text" in p ? (p as any).text : "")).join(" ").trim()
+        : ""
+      if (text.includes("CRISIS_ALERT")) setShowCrisisAlert(true)
     },
   })
 
@@ -54,8 +59,8 @@ export default function ChatPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (inputValue.trim() && status !== "in_progress") {
-      sendMessage({ content: inputValue })
+    if (inputValue.trim() && status !== "streaming") {
+      sendMessage({ parts: [{ type: "text", text: inputValue }] } as any)
       setInputValue("")
     }
   }
@@ -108,6 +113,14 @@ export default function ChatPage() {
                 </p>
               </div>
             </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Error Alert */}
+        {errorMessage && (
+          <Alert className="mb-6 border-yellow-500 bg-yellow-50 dark:bg-yellow-950">
+            <AlertTriangle className="h-4 w-4 text-yellow-600" />
+            <AlertDescription className="text-yellow-800 dark:text-yellow-200">{errorMessage}</AlertDescription>
           </Alert>
         )}
 
@@ -200,7 +213,18 @@ export default function ChatPage() {
                             : "bg-secondary text-secondary-foreground"
                         }`}
                       >
-                        <p className="text-sm whitespace-pre-wrap">{message.content.replace("CRISIS_ALERT", "")}</p>
+                        <p className="text-sm whitespace-pre-wrap">
+                          {(() => {
+                            const parts = (message as any)?.parts || []
+                            const text = Array.isArray(parts)
+                              ? parts
+                                  .map((p: any) => (p && typeof p === "object" && "text" in p ? (p as any).text : ""))
+                                  .join(" ")
+                                  .trim()
+                              : ""
+                            return text.replace("CRISIS_ALERT", "")
+                          })()}
+                        </p>
                       </motion.div>
                       <p className="text-xs text-muted-foreground mt-1">
                         {message.role === "user" ? "You" : "Astitva AI"}
@@ -210,7 +234,7 @@ export default function ChatPage() {
                 ))}
               </AnimatePresence>
 
-              {status === "in_progress" && (
+              {status === "streaming" && (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -240,12 +264,12 @@ export default function ChatPage() {
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 placeholder="Type your message here..."
-                disabled={status === "in_progress"}
+                disabled={status === "streaming"}
                 className="flex-1"
               />
               <Button
                 type="submit"
-                disabled={!inputValue.trim() || status === "in_progress"}
+                disabled={!inputValue.trim() || status === "streaming"}
                 className="hover:bg-primary/90 transition-colors"
               >
                 <Send className="w-4 h-4" />
