@@ -94,3 +94,12 @@ coverage/
 *.tar.gz
 *.rar
 *.7z
+# Ignore all env files
+.env
+.env.*
+backend/.env
+backend/.env.*
+frontend/.env
+frontend/.env.*
+frontend/.env.local
+
