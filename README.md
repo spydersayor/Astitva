@@ -71,20 +71,23 @@ For Streamlit Cloud, set `OPENAI_API_KEY` in app Secrets. Do not commit real key
 
 ## Deploy Notes
 
-### Vercel (Recommended for Frontend)
-1. **Import Project**: Connect your GitHub repo to Vercel
-2. **Set Root Directory**: `frontend` (since Next.js app is in frontend/)
-3. **Environment Variables** (Vercel Dashboard → Settings → Environment Variables):
-   - `MISTRAL_API_KEY` = your_mistral_key
-   - `MISTRAL_BASE_URL` = https://api.mistral.ai/v1
-   - `NEXT_PUBLIC_APP_NAME` = Astitva
-   - `NEXT_PUBLIC_API_BASE` = your_backend_url (if using separate backend)
-4. **Deploy**: Vercel auto-builds and deploys
+### Streamlit Community Cloud (Recommended)
+1. **Push to GitHub**: Ensure your repo is on GitHub
+2. **Create Streamlit App**: 
+   - Go to share.streamlit.io
+   - New app → Connect GitHub repo
+   - App file: `streamlit/app.py`
+   - Requirements: `streamlit/requirements.txt`
+3. **Add Secrets** (Streamlit Dashboard → Settings → Secrets):
+   ```
+   OPENAI_API_KEY = sk-your_key_here
+   OPENAI_MODEL = gpt-4o-mini
+   ```
+4. **Deploy**: Streamlit builds and runs automatically
 
 ### Other Platforms
 - Frontend: Set env vars in the hosting platform; avoid putting secrets in `NEXT_PUBLIC_*` unless intended to be public.
 - Backend: Provide `JWT_SECRET`, `OPENAI_API_KEY`, `DATABASE_URL` as server env vars.
-- Streamlit: Use Streamlit Secrets for `OPENAI_API_KEY`; `.streamlit/secrets.toml` is git-ignored.
 
 ## Additional Hardening
 - Double-check `.gitignore` before committing; ensure no `.env` files are tracked.
