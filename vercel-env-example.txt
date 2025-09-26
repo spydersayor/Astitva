@@ -1,0 +1,17 @@
+# Vercel Environment Variables (set in Vercel Dashboard)
+
+# AI Provider (choose one)
+# Option 1: Mistral
+MISTRAL_API_KEY=your_mistral_key_here
+MISTRAL_BASE_URL=https://api.mistral.ai/v1
+
+# Option 2: OpenAI (alternative)
+# OPENAI_API_KEY=sk-your_openai_key_here
+# OPENAI_BASE_URL=https://api.openai.com/v1
+
+# Public variables (safe to expose)
+NEXT_PUBLIC_APP_NAME=Astitva
+NEXT_PUBLIC_API_BASE=https://your-backend-url.com/api
+
+# Production settings
+NODE_ENV=production
