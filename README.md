@@ -71,15 +71,18 @@ For Streamlit Cloud, set `OPENAI_API_KEY` in app Secrets. Do not commit real key
 
 ## Deploy Notes
 
-### Vercel (Recommended for Frontend)
+### Vercel (Full Stack Deployment)
 1. **Import Project**: Connect your GitHub repo to Vercel
-2. **Set Root Directory**: `frontend` (since Next.js app is in frontend/)
+2. **Set Root Directory**: Leave as root (deploys entire app)
 3. **Environment Variables** (Vercel Dashboard → Settings → Environment Variables):
    - `MISTRAL_API_KEY` = your_mistral_key
    - `MISTRAL_BASE_URL` = https://api.mistral.ai/v1
+   - `JWT_SECRET` = your_jwt_secret
+   - `DATABASE_URL` = your_database_url (if using database)
+   - `CORS_ORIGIN` = https://your-app.vercel.app
    - `NEXT_PUBLIC_APP_NAME` = Astitva
-   - `NEXT_PUBLIC_API_BASE` = your_backend_url (if using separate backend)
-4. **Deploy**: Vercel auto-builds and deploys
+   - `NEXT_PUBLIC_API_BASE` = https://your-app.vercel.app/api
+4. **Deploy**: Vercel builds both frontend and backend automatically
 
 ### Streamlit Community Cloud (Alternative)
 1. **Push to GitHub**: Ensure your repo is on GitHub

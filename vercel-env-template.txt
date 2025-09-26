@@ -10,9 +10,14 @@ MISTRAL_BASE_URL=https://api.mistral.ai/v1
 # OPENAI_API_KEY=sk-your_openai_key_here
 # OPENAI_BASE_URL=https://api.openai.com/v1
 
+# Backend Environment Variables
+JWT_SECRET=your_jwt_secret_here
+DATABASE_URL=your_database_url_here
+CORS_ORIGIN=https://your-app.vercel.app
+
 # Public variables (safe to expose)
 NEXT_PUBLIC_APP_NAME=Astitva
-NEXT_PUBLIC_API_BASE=https://your-backend-url.com/api
+NEXT_PUBLIC_API_BASE=https://your-app.vercel.app/api
 
 # Production settings
 NODE_ENV=production
